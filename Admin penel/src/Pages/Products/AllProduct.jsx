@@ -10,7 +10,7 @@ const AllProduct = () => {
     useEffect(() => {
         const fetchData = async () => {
             try {
-                const response = await fetch('http://localhost:8000/api/get-course-details');
+                const response = await fetch('https://ins.api.digiindiasolutions.com/api/get-course-details');
                 const result = await response.json();
                 if (result.success) {
                     setCourseData(result.data);

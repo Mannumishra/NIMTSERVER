@@ -5,7 +5,7 @@ const mongoose = require("mongoose")
 
 const createCourse = async (req, res) => {
     try {
-        const { courseCtegory, courseName, courseTopic, courseDuration, courseEnrollment, showinHomePage } = req.body;
+        const { courseCtegory, courseName, courseTopic, courseDuration, showinHomePage } = req.body;
         const errorMessages = [];
         if (!courseCtegory) {
             errorMessages.push("Course Category ID is required.");
@@ -18,9 +18,6 @@ const createCourse = async (req, res) => {
         }
         if (!courseDuration) {
             errorMessages.push("Course Duration is required.");
-        }
-        if (!courseEnrollment) {
-            errorMessages.push("Course Enrollment is required.");
         }
         if (errorMessages.length > 0) {
             return res.status(400).json({ message: 'Validation errors', errors: errorMessages.join(",") });

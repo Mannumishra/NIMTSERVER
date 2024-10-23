@@ -20,7 +20,6 @@ const CourseSchema = new mongoose.Schema({
     },
     courseEnrollment: {
         type: Number,
-        required: true
     },
     image: {
         type: String,

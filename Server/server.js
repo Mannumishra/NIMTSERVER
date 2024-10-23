@@ -6,6 +6,7 @@ const cors = require("cors")
 const CourseCategoryRouter = require("./Routes/CourseCategory")
 const CourseRouter = require("./Routes/Course")
 const CourseDetailsRouter = require("./Routes/CourseDetails")
+const QueryRouter = require("./Routes/Query")
 
 const app = express()
 app.use(cors())
@@ -20,6 +21,7 @@ app.get("/", (req, res) => {
 app.use("/api", CourseCategoryRouter)
 app.use("/api", CourseRouter)
 app.use("/api", CourseDetailsRouter)
+app.use("/api", QueryRouter)
 
 app.listen(process.env.PORT, () => {
     console.log(`Server Is Running At ${process.env.PORT}`)

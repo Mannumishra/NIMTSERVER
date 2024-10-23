@@ -84,28 +84,19 @@ exports.updateCourseDetails = async (req, res) => {
 // Delete Course Details
 exports.deleteCourseDetails = async (req, res) => {
     try {
-        // Find the course details by ID
         const data = await courseDetails.findById(req.params.id);
-
         if (!data) {
             return res.status(404).json({ success: false, message: 'Course details not found' });
         }
-
-        // Extract the public ID from the image URL
         const publicId = getPublicIdFromUrl(data.image);
-
-        // Delete the image from Cloudinary
         await deleteImage(publicId);
-
-        // Delete the record from MongoDB
-        await courseDetails.remove();
-
+        await courseDetails.deleteOne();
         res.status(200).json({
             success: true,
             message: 'Course details and associated image deleted successfully'
         });
     } catch (error) {
-        res.status(400).json({ success: false, error: error.message });
+        res.status(500).json({ success: false, error: error.message ,message:"Internal Server Error" });
     }
 };
 

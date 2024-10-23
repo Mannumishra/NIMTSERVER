@@ -1,3 +1,4 @@
+const course = require("../Model/Course");
 const categoryCourse = require("../Model/CourseCategory")
 
 const createCategory = async (req, res) => {
@@ -140,6 +141,16 @@ const deleteCouserCategory = async (req, res) => {
         const { name } = req.params
         const chnageUpperCase = name.toUpperCase()
         const data = await categoryCourse.findOne({ courseCategoryName: chnageUpperCase })
+
+        const relatedCourses = await course.find({ courseCtegory: data._id });
+        console.log(relatedCourses)
+        if (relatedCourses.length > 0) {
+            // If there are related courses, send a response indicating deletion is not allowed
+            return res.status(400).json({
+                success: false,
+                message: "This category cannot be deleted because there are related courses."
+            });
+        }
         if (!data) {
             return res.status(404).json({
                 success: false,

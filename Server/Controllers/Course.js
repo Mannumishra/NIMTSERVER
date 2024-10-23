@@ -91,13 +91,23 @@ const deleteCourse = async (req, res) => {
     try {
         const { id } = req.params;
         const data = await course.findById(id);
+
+        const relatedRecord = await courseDetails.find({ courseName: id })
+        // console.log(relatedRecord)
+        if (relatedRecord.length > 0) {
+            return res.status(400).json({
+                success: false,
+                message: "This course name cannot be deleted because there are related course details."
+            });
+        }
+
         if (!data) {
             return res.status(404).json({ message: 'Course not found.' });
         }
         const publicId = data.image.split('/').pop().split('.')[0]; // Extract public ID from the image URL
         await deleteImage(publicId); // Delete image from Cloudinary
 
-        await course.deleteOne(); // Pass the correct parameter to delete the course
+        // await course.deleteOne(); // Pass the correct parameter to delete the course
         res.status(200).json({ message: 'Course deleted successfully!' });
     } catch (error) {
         console.error(error);

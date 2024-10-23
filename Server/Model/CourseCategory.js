@@ -7,6 +7,8 @@ const courseCategorySchema = new mongoose.Schema({
     }
 }, { timestamps: true })
 
+
+
 const categoryCourse = mongoose.model("CourseCategory" , courseCategorySchema)
 
 module.exports = categoryCourse

@@ -5,7 +5,7 @@ const mongoose = require("mongoose")
 
 const createCourse = async (req, res) => {
     try {
-        const { courseCtegory, courseName, courseTopic, courseDuration, showinHomePage } = req.body;
+        const { courseCtegory, courseName, courseTopic, courseDuration, showinHomePage , courseEnrollment } = req.body;
         const errorMessages = [];
         if (!courseCtegory) {
             errorMessages.push("Course Category ID is required.");
@@ -104,7 +104,7 @@ const deleteCourse = async (req, res) => {
         const publicId = data.image.split('/').pop().split('.')[0]; // Extract public ID from the image URL
         await deleteImage(publicId); // Delete image from Cloudinary
 
-        // await course.deleteOne(); // Pass the correct parameter to delete the course
+        await course.deleteOne(); // Pass the correct parameter to delete the course
         res.status(200).json({ message: 'Course deleted successfully!' });
     } catch (error) {
         console.error(error);

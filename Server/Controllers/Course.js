@@ -5,7 +5,7 @@ const mongoose = require("mongoose")
 
 const createCourse = async (req, res) => {
     try {
-        const { courseCtegory, courseName, courseTopic, courseDuration, showinHomePage , courseEnrollment } = req.body;
+        const { courseCtegory, courseName, courseTopic, courseDuration, showinHomePage, courseEnrollment } = req.body;
         const errorMessages = [];
         if (!courseCtegory) {
             errorMessages.push("Course Category ID is required.");
@@ -60,25 +60,52 @@ const createCourse = async (req, res) => {
 const updateCourse = async (req, res) => {
     try {
         const { id } = req.params;
+        console.log("Request Body:", req.body); // Log the request body to debug
         const courseToUpdate = await course.findById(id);
+        
         if (!courseToUpdate) {
             return res.status(404).json({ message: 'Course not found.' });
         }
 
+        // Prepare updated data
         const updatedData = {
-            ...req.body,
+            courseCtegory: req.body.courseCtegory,
+            courseName: req.body.courseName,
+            courseTopic: req.body.courseTopic,
+            courseDuration: req.body.courseDuration,
             showinHomePage: req.body.showinHomePage
         };
+
+        // Handle courseEnrollment with validation
+        const enrollmentValue = req.body.courseEnrollment;
+        if (enrollmentValue === null || enrollmentValue === '' || enrollmentValue === 'null') {
+            updatedData.courseEnrollment = 0; // Set to 0 if not provided
+        } else {
+            const parsedValue = Number(enrollmentValue);
+            if (!isNaN(parsedValue)) {
+                updatedData.courseEnrollment = parsedValue;
+            } else {
+                return res.status(400).json({ message: 'Invalid course enrollment value.' });
+            }
+        }
+
+        // Check if an image is uploaded
+        if (req.file) {
+            const folderName = 'NIMT';
+            const imageUrl = await uploadImage(req.file.path, folderName);
+            updatedData.image = imageUrl; // Update image URL
+        }
 
         // Update the course with the new data
         await course.updateOne({ _id: id }, updatedData);
 
         res.status(200).json({ message: 'Course updated successfully!', data: updatedData });
     } catch (error) {
-        console.error(error);
+        console.error("Error during course update:", error); // Enhanced logging
         res.status(500).json({ message: 'Error updating course', error: error.message });
     }
 };
+
 
 
 // Other functions remain unchanged...
@@ -165,9 +192,9 @@ const getCourseAfterDetails = async (req, res) => {
 
 const getSingleCourse = async (req, res) => {
     try {
-        const { name } = req.params
-        const upperCaseName = name.toUpperCase()
-        const data = await course.findOne({ courseName: upperCaseName }).populate("courseCtegory")
+        const { id } = req.params
+        console.log(id)
+        const data = await course.findById(id).populate("courseCtegory")
         if (!data) {
             return res.status(404).json({
                 success: false,

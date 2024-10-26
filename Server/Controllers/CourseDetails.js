@@ -114,11 +114,11 @@ exports.getAllCourseDetails = async (req, res) => {
 // Get a single Course Details by ID
 exports.getCourseDetailsById = async (req, res) => {
     try {
-        const courseId = req.params.id;
-        console.log("My Id", courseId);
+        const id = req.params.id;
+        console.log("My Id", id);
 
         // Find the courseDetails by courseName reference and populate the related course data
-        const data = await courseDetails.findOne({ courseName: courseId }).populate('courseName');
+        const data = await courseDetails.findById(id).populate('courseName');
 
         // Handle case if no data is found
         if (!data) {

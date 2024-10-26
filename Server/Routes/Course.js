@@ -7,7 +7,7 @@ CourseRouter.post("/create-course",upload.single("image") ,createCourse)
 CourseRouter.put("/update-course/:id",upload.single("image") ,updateCourse)
 CourseRouter.get("/get-all-course" ,getAllCourse)
 CourseRouter.get("/get-all-filter-course" ,getCourseAfterDetails)
-CourseRouter.get("/get-single-course/:name" ,getSingleCourse)
+CourseRouter.get("/get-single-course/:id" ,getSingleCourse)
 CourseRouter.delete("/delete-course/:id" ,deleteCourse)
 
 module.exports = CourseRouter

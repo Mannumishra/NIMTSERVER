@@ -28,10 +28,10 @@ const deleteImage = async (path) => {
 
 const getPublicIdFromUrl = (url) => {
     const parts = url.split('/');
-    const publicIdWithExtension = parts[parts.length - 1]; // Get the last part of the URL
-    return publicIdWithExtension.split('.')[0]; // Remove the extension
+    const folderAndPublicId = parts.slice(-2).join('/'); // Include folder path if any
+    return folderAndPublicId.split('.')[0]; // Remove the extension
 };
 
 module.exports = {
-    uploadImage, deleteImage ,getPublicIdFromUrl
+    uploadImage, deleteImage, getPublicIdFromUrl
 }

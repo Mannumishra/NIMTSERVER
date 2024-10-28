@@ -57,54 +57,6 @@ const createCourse = async (req, res) => {
     }
 };
 
-const updateCourse = async (req, res) => {
-    try {
-        const { id } = req.params;
-        console.log("Request Body:", req.body); // Log the request body to debug
-        const courseToUpdate = await course.findById(id);
-        
-        if (!courseToUpdate) {
-            return res.status(404).json({ message: 'Course not found.' });
-        }
-
-        // Prepare updated data
-        const updatedData = {
-            courseCtegory: req.body.courseCtegory,
-            courseName: req.body.courseName,
-            courseTopic: req.body.courseTopic,
-            courseDuration: req.body.courseDuration,
-            showinHomePage: req.body.showinHomePage
-        };
-
-        // Handle courseEnrollment with validation
-        const enrollmentValue = req.body.courseEnrollment;
-        if (enrollmentValue === null || enrollmentValue === '' || enrollmentValue === 'null') {
-            updatedData.courseEnrollment = 0; // Set to 0 if not provided
-        } else {
-            const parsedValue = Number(enrollmentValue);
-            if (!isNaN(parsedValue)) {
-                updatedData.courseEnrollment = parsedValue;
-            } else {
-                return res.status(400).json({ message: 'Invalid course enrollment value.' });
-            }
-        }
-
-        // Check if an image is uploaded
-        if (req.file) {
-            const folderName = 'NIMT';
-            const imageUrl = await uploadImage(req.file.path, folderName);
-            updatedData.image = imageUrl; // Update image URL
-        }
-
-        // Update the course with the new data
-        await course.updateOne({ _id: id }, updatedData);
-
-        res.status(200).json({ message: 'Course updated successfully!', data: updatedData });
-    } catch (error) {
-        console.error("Error during course update:", error); // Enhanced logging
-        res.status(500).json({ message: 'Error updating course', error: error.message });
-    }
-};
 
 
 
@@ -213,88 +165,61 @@ const getSingleCourse = async (req, res) => {
 }
 
 
-// const updateCourse = async (req, res) => {
-//     try {
-//         const { name } = req.params;
-//         const upperCaseName = name.toUpperCase();
-//         const courseToUpdate = await course.findOne({ courseName: upperCaseName });
+const updateCourse = async (req, res) => {
+    try {
+        const { id } = req.params;
+        console.log("UpdateID")
+        console.log(req.body)
+        const { courseCtegory, courseName, courseTopic, courseDuration, courseEnrollment, showinHomePage } = req.body;
 
-//         if (!courseToUpdate) {
-//             return res.status(404).json({ message: 'Course not found.' });
-//         }
+        const courseToUpdate = await course.findById(id);
+        if (!courseToUpdate) {
+            return res.status(404).json({ message: 'Course not found.' });
+        }
 
-//         console.log(req.body)
-//         // Validate courseCtegory field
-//         if (req.body.courseCtegory) {
-//             if (!mongoose.Types.ObjectId.isValid(req.body.courseCtegory)) {
-//                 return res.status(400).json({ message: 'Invalid course category ID.' });
-//             }
-//         }
+        // Validate course category
+        if (courseCtegory && !mongoose.Types.ObjectId.isValid(courseCtegory)) {
+            return res.status(400).json({ message: 'Invalid course category ID.' });
+        }
 
-//         // Check if a new course name is provided and if it already exists
-//         if (req.body.courseName) {
-//             const newUpperCaseName = req.body.courseName.toUpperCase();
-//             const existingCourse = await course.findOne({ courseName: newUpperCaseName });
+        // Check if the course name is unique
+        const upperCaseName = courseName.toUpperCase();
+        const existingCourse = await course.findOne({ courseName: upperCaseName });
+        if (existingCourse && existingCourse._id.toString() !== id) {
+            return res.status(400).json({ message: 'This course name already exists.' });
+        }
 
-//             // If an existing course is found and it's not the same course
-//             if (existingCourse && existingCourse.courseName !== upperCaseName) {
-//                 return res.status(400).json({
-//                     success: false,
-//                     message: "This course name already exists."
-//                 });
-//             }
-//         }
+        // Handle image update if a new file is provided
+        let imageUrl = courseToUpdate.image;
+        if (req.file) {
+            const publicId = courseToUpdate.image.split('/').pop().split('.')[0]; // Extract public ID
+            await deleteImage(publicId); // Delete old image from Cloudinary
 
-//         let imageUrl;
-//         if (req.file) {
-//             const publicId = courseToUpdate.image.split('/').pop().split('.')[0]; // Extract public ID from the old image URL
-//             await deleteImage(publicId); // Delete old image from Cloudinary
+            const folderName = 'NIMT';
+            imageUrl = await uploadImage(req.file.path, folderName); // Upload new image
+        }
 
-//             const folderName = 'NIMT';
-//             imageUrl = await uploadImage(req.file.path, folderName);
-//         } else {
-//             imageUrl = courseToUpdate.image; // Retain the old image if no new image is uploaded
-//         }
+        // Prepare updated data
+        const updatedData = {
+            courseCtegory,
+            courseName: upperCaseName,
+            courseTopic,
+            courseDuration,
+            courseEnrollment,
+            image: imageUrl,
+            showinHomePage
+        };
 
-//         // Update the course data
-//         const updatedData = {
-//             ...req.body,
-//             courseName: upperCaseName,
-//             image: imageUrl
-//         };
+        // Update the course
+        await course.findByIdAndUpdate(id, updatedData, { new: true });
 
-//         console.log('Updated Data:', updatedData); // Log the updated data for debugging
+        res.status(200).json({ message: 'Course updated successfully!', data: updatedData });
+    } catch (error) {
+        console.error(error);
+        res.status(500).json({ message: 'Error updating course', error: error.message });
+    }
+};
 
-//         await course.updateOne({ courseName: upperCaseName }, updatedData); // Update the course with new data
-
-//         res.status(200).json({ message: 'Course updated successfully!', data: updatedData });
-//     } catch (error) {
-//         console.error(error);
-//         res.status(500).json({ message: 'Error updating course', error: error.message });
-//     }
-// };
-
-
-
-// // Delete a course by ID
-// const deleteCourse = async (req, res) => {
-//     try {
-//         const { name } = req.params;
-//         const upperCaseName = name.toUpperCase()
-//         const data = await course.findOne({ courseName: upperCaseName });
-//         if (!data) {
-//             return res.status(404).json({ message: 'Course not found.' });
-//         }
-//         const publicId = data.image.split('/').pop().split('.')[0]; // Extract public ID from the image URL
-//         await deleteImage(publicId); // Delete image from Cloudinary
-
-//         await course.deleteOne();
-//         res.status(200).json({ message: 'Course deleted successfully!' });
-//     } catch (error) {
-//         console.error(error);
-//         res.status(500).json({ message: 'Error deleting course', error: error.message });
-//     }
-// };
 
 // Export the controller methods
 module.exports = {
